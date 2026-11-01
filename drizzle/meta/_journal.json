@@ -15,6 +15,13 @@
       "when": 1793506479408,
       "tag": "0001_funny_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793548229833,
+      "tag": "0002_concerned_doctor_faustus",
+      "breakpoints": true
     }
   ]
 }

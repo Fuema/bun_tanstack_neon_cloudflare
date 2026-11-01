@@ -94,3 +94,21 @@ export function sendTwoFactorCodeEmail(to: string, name: string, otp: string) {
 		text: `Hi ${name}, your ${APP_NAME} sign-in code is ${otp}. It expires in 3 minutes.`,
 	});
 }
+
+export function sendInvitationEmail(
+	to: string,
+	inviterName: string,
+	workspaceName: string,
+	role: string,
+	url: string,
+) {
+	return sendEmail({
+		to,
+		subject: `${inviterName} invited you to ${workspaceName} on ${APP_NAME}`,
+		html: layout(
+			`Join ${escapeHtml(workspaceName)}`,
+			`<p style="color:#3f3f46">${escapeHtml(inviterName)} invited you to join <strong>${escapeHtml(workspaceName)}</strong> as <strong>${escapeHtml(role)}</strong>. The invitation expires in 48 hours.</p>${button(url, "Accept invitation")}`,
+		),
+		text: `${inviterName} invited you to join ${workspaceName} on ${APP_NAME} as ${role}: ${url}\nThe invitation expires in 48 hours.`,
+	});
+}

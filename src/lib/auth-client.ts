@@ -1,6 +1,10 @@
 import { passkeyClient } from "@better-auth/passkey/client";
-import { twoFactorClient } from "better-auth/client/plugins";
+import {
+	organizationClient,
+	twoFactorClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
+import { ac, roles } from "./permissions";
 
 // No baseURL: the client calls /api/auth on the current origin, which works on
 // localhost and on Cloudflare, and avoids touching `window` during SSR.
@@ -13,6 +17,7 @@ export const authClient = createAuthClient({
 			},
 		}),
 		passkeyClient(),
+		organizationClient({ ac, roles }),
 	],
 });
 
@@ -52,7 +57,28 @@ export function authErrorMessage(
 			return "This link is invalid or has expired. Request a new one.";
 		case "SESSION_EXPIRED":
 			return "For your security, please sign in again to continue.";
+		case "ORGANIZATION_SLUG_ALREADY_TAKEN":
+			return "That workspace URL is taken. Try another name.";
+		case "INVITATION_NOT_FOUND":
+			return "This invitation doesn't exist, was cancelled, or has expired.";
+		case "YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION":
+			return "This invitation was sent to a different email address. Sign in with that account to accept it.";
+		case "EMAIL_VERIFICATION_REQUIRED_BEFORE_ACCEPTING_OR_REJECTING_INVITATION":
+			return "Verify your email address before accepting invitations.";
+		case "USER_IS_ALREADY_A_MEMBER_OF_THIS_ORGANIZATION":
+			return "That person is already a member of this workspace.";
+		case "USER_IS_ALREADY_INVITED_TO_THIS_ORGANIZATION":
+			return "That person already has a pending invitation.";
+		case "YOU_CANNOT_LEAVE_THE_ORGANIZATION_AS_THE_ONLY_OWNER":
+			return "You're the only owner. Make someone else an owner or delete the workspace instead.";
+		case "ORGANIZATION_MEMBERSHIP_LIMIT_REACHED":
+			return "This workspace has reached its member limit.";
+		case "YOU_HAVE_REACHED_THE_MAXIMUM_NUMBER_OF_ORGANIZATIONS":
+			return "You've reached the maximum number of workspaces.";
 		default:
+			if (error.code?.startsWith("YOU_ARE_NOT_ALLOWED")) {
+				return "Your role in this workspace doesn't allow that.";
+			}
 			return error.message || "Something went wrong. Please try again.";
 	}
 }

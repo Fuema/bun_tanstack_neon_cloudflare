@@ -14,12 +14,17 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedProjectsRouteImport } from './routes/_authed/projects'
 import { Route as GuestForgotPasswordRouteImport } from './routes/_guest/forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest/login'
 import { Route as GuestResetPasswordRouteImport } from './routes/_guest/reset-password'
 import { Route as GuestSignupRouteImport } from './routes/_guest/signup'
 import { Route as GuestTwoFactorRouteImport } from './routes/_guest/two-factor'
+import { Route as AuthedAcceptInvitationInvitationIdRouteImport } from './routes/_authed/accept-invitation.$invitationId'
 import { Route as AuthedAccountSecurityRouteImport } from './routes/_authed/account/security'
+import { Route as AuthedWorkspaceMembersRouteImport } from './routes/_authed/workspace/members'
+import { Route as AuthedWorkspaceNewRouteImport } from './routes/_authed/workspace/new'
+import { Route as AuthedWorkspaceSettingsRouteImport } from './routes/_authed/workspace/settings'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +48,11 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProjectsRoute = AuthedProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => AuthedRoute,
 } as any)
 const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
@@ -70,9 +80,30 @@ const GuestTwoFactorRoute = GuestTwoFactorRouteImport.update({
   path: '/two-factor',
   getParentRoute: () => GuestRoute,
 } as any)
+const AuthedAcceptInvitationInvitationIdRoute =
+  AuthedAcceptInvitationInvitationIdRouteImport.update({
+    id: '/accept-invitation/$invitationId',
+    path: '/accept-invitation/$invitationId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedAccountSecurityRoute = AuthedAccountSecurityRouteImport.update({
   id: '/account/security',
   path: '/account/security',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWorkspaceMembersRoute = AuthedWorkspaceMembersRouteImport.update({
+  id: '/workspace/members',
+  path: '/workspace/members',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWorkspaceNewRoute = AuthedWorkspaceNewRouteImport.update({
+  id: '/workspace/new',
+  path: '/workspace/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWorkspaceSettingsRoute = AuthedWorkspaceSettingsRouteImport.update({
+  id: '/workspace/settings',
+  path: '/workspace/settings',
   getParentRoute: () => AuthedRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -85,24 +116,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthedDashboardRoute
+  '/projects': typeof AuthedProjectsRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
   '/signup': typeof GuestSignupRoute
   '/two-factor': typeof GuestTwoFactorRoute
+  '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/account/security': typeof AuthedAccountSecurityRoute
+  '/workspace/members': typeof AuthedWorkspaceMembersRoute
+  '/workspace/new': typeof AuthedWorkspaceNewRoute
+  '/workspace/settings': typeof AuthedWorkspaceSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthedDashboardRoute
+  '/projects': typeof AuthedProjectsRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
   '/signup': typeof GuestSignupRoute
   '/two-factor': typeof GuestTwoFactorRoute
+  '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/account/security': typeof AuthedAccountSecurityRoute
+  '/workspace/members': typeof AuthedWorkspaceMembersRoute
+  '/workspace/new': typeof AuthedWorkspaceNewRoute
+  '/workspace/settings': typeof AuthedWorkspaceSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -112,12 +153,17 @@ export interface FileRoutesById {
   '/_guest': typeof GuestRouteWithChildren
   '/verify-email': typeof VerifyEmailRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
+  '/_authed/projects': typeof AuthedProjectsRoute
   '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/reset-password': typeof GuestResetPasswordRoute
   '/_guest/signup': typeof GuestSignupRoute
   '/_guest/two-factor': typeof GuestTwoFactorRoute
+  '/_authed/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/_authed/account/security': typeof AuthedAccountSecurityRoute
+  '/_authed/workspace/members': typeof AuthedWorkspaceMembersRoute
+  '/_authed/workspace/new': typeof AuthedWorkspaceNewRoute
+  '/_authed/workspace/settings': typeof AuthedWorkspaceSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -126,24 +172,34 @@ export interface FileRouteTypes {
     | '/'
     | '/verify-email'
     | '/dashboard'
+    | '/projects'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/two-factor'
+    | '/accept-invitation/$invitationId'
     | '/account/security'
+    | '/workspace/members'
+    | '/workspace/new'
+    | '/workspace/settings'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/verify-email'
     | '/dashboard'
+    | '/projects'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/two-factor'
+    | '/accept-invitation/$invitationId'
     | '/account/security'
+    | '/workspace/members'
+    | '/workspace/new'
+    | '/workspace/settings'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -152,12 +208,17 @@ export interface FileRouteTypes {
     | '/_guest'
     | '/verify-email'
     | '/_authed/dashboard'
+    | '/_authed/projects'
     | '/_guest/forgot-password'
     | '/_guest/login'
     | '/_guest/reset-password'
     | '/_guest/signup'
     | '/_guest/two-factor'
+    | '/_authed/accept-invitation/$invitationId'
     | '/_authed/account/security'
+    | '/_authed/workspace/members'
+    | '/_authed/workspace/new'
+    | '/_authed/workspace/settings'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -206,6 +267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/projects': {
+      id: '/_authed/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AuthedProjectsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_guest/forgot-password': {
       id: '/_guest/forgot-password'
       path: '/forgot-password'
@@ -241,11 +309,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestTwoFactorRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_authed/accept-invitation/$invitationId': {
+      id: '/_authed/accept-invitation/$invitationId'
+      path: '/accept-invitation/$invitationId'
+      fullPath: '/accept-invitation/$invitationId'
+      preLoaderRoute: typeof AuthedAcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/account/security': {
       id: '/_authed/account/security'
       path: '/account/security'
       fullPath: '/account/security'
       preLoaderRoute: typeof AuthedAccountSecurityRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/workspace/members': {
+      id: '/_authed/workspace/members'
+      path: '/workspace/members'
+      fullPath: '/workspace/members'
+      preLoaderRoute: typeof AuthedWorkspaceMembersRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/workspace/new': {
+      id: '/_authed/workspace/new'
+      path: '/workspace/new'
+      fullPath: '/workspace/new'
+      preLoaderRoute: typeof AuthedWorkspaceNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/workspace/settings': {
+      id: '/_authed/workspace/settings'
+      path: '/workspace/settings'
+      fullPath: '/workspace/settings'
+      preLoaderRoute: typeof AuthedWorkspaceSettingsRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/api/auth/$': {
@@ -260,12 +356,23 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedProjectsRoute: typeof AuthedProjectsRoute
+  AuthedAcceptInvitationInvitationIdRoute: typeof AuthedAcceptInvitationInvitationIdRoute
   AuthedAccountSecurityRoute: typeof AuthedAccountSecurityRoute
+  AuthedWorkspaceMembersRoute: typeof AuthedWorkspaceMembersRoute
+  AuthedWorkspaceNewRoute: typeof AuthedWorkspaceNewRoute
+  AuthedWorkspaceSettingsRoute: typeof AuthedWorkspaceSettingsRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedProjectsRoute: AuthedProjectsRoute,
+  AuthedAcceptInvitationInvitationIdRoute:
+    AuthedAcceptInvitationInvitationIdRoute,
   AuthedAccountSecurityRoute: AuthedAccountSecurityRoute,
+  AuthedWorkspaceMembersRoute: AuthedWorkspaceMembersRoute,
+  AuthedWorkspaceNewRoute: AuthedWorkspaceNewRoute,
+  AuthedWorkspaceSettingsRoute: AuthedWorkspaceSettingsRoute,
 }
 
 const AuthedRouteWithChildren =
