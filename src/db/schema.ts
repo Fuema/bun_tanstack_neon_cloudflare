@@ -32,6 +32,8 @@ export const session = pgTable("session", {
 	userId: text("user_id")
 		.notNull()
 		.references(() => user.id, { onDelete: "cascade" }),
+	// organization plugin: the workspace this session is working in
+	activeOrganizationId: text("active_organization_id"),
 });
 
 export const account = pgTable("account", {
@@ -113,3 +115,75 @@ export const rateLimit = pgTable("rate_limit", {
 	count: integer("count").notNull(),
 	lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });
+
+// organization plugin: workspaces
+export const organization = pgTable("organization", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	slug: text("slug").notNull().unique(),
+	logo: text("logo"),
+	createdAt: timestamp("created_at").notNull(),
+	metadata: text("metadata"),
+});
+
+// organization plugin: who belongs to which workspace, and with which role
+export const member = pgTable(
+	"member",
+	{
+		id: text("id").primaryKey(),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		role: text("role").notNull().default("viewer"),
+		createdAt: timestamp("created_at").notNull(),
+	},
+	(t) => [
+		index("member_organization_id_idx").on(t.organizationId),
+		index("member_user_id_idx").on(t.userId),
+	],
+);
+
+// organization plugin: pending email invitations
+export const invitation = pgTable(
+	"invitation",
+	{
+		id: text("id").primaryKey(),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		email: text("email").notNull(),
+		role: text("role"),
+		status: text("status").notNull().default("pending"),
+		expiresAt: timestamp("expires_at").notNull(),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		inviterId: text("inviter_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+	},
+	(t) => [
+		index("invitation_organization_id_idx").on(t.organizationId),
+		index("invitation_email_idx").on(t.email),
+	],
+);
+
+// Example business resource: every project belongs to exactly one workspace
+export const project = pgTable(
+	"project",
+	{
+		id: text("id").primaryKey(),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		name: text("name").notNull(),
+		description: text("description"),
+		createdById: text("created_by_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [index("project_organization_id_idx").on(t.organizationId)],
+);

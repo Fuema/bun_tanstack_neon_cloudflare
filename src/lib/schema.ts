@@ -164,3 +164,26 @@ export const backupCodeSchema = z
 		/^[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}$/,
 		"Enter a backup code like ABCDE-12345",
 	);
+
+export const workspaceNameSchema = z
+	.string()
+	.trim()
+	.min(2, "Workspace name must be at least 2 characters")
+	.max(50, "Workspace name must not exceed 50 characters");
+
+export const inviteSchema = z.object({
+	email: emailSchema,
+	role: z.enum(["admin", "editor", "viewer"], "Choose a role"),
+});
+
+export const projectInputSchema = z.object({
+	name: z
+		.string()
+		.trim()
+		.min(2, "Name must be at least 2 characters")
+		.max(80, "Name must not exceed 80 characters"),
+	description: z
+		.string()
+		.trim()
+		.max(500, "Description must not exceed 500 characters"),
+});
