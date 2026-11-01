@@ -8,6 +8,13 @@
       "when": 1793501791283,
       "tag": "0000_black_wendell_vaughn",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793506479408,
+      "tag": "0001_funny_gunslinger",
+      "breakpoints": true
     }
   ]
 }
