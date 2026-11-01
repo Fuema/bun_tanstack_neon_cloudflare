@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as AuthedCustomersRouteImport } from './routes/_authed/customers'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedProjectsRouteImport } from './routes/_authed/projects'
 import { Route as GuestForgotPasswordRouteImport } from './routes/_guest/forgot-password'
@@ -44,6 +45,11 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedCustomersRoute = AuthedCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
@@ -115,6 +121,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/customers': typeof AuthedCustomersRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/projects': typeof AuthedProjectsRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/customers': typeof AuthedCustomersRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/projects': typeof AuthedProjectsRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/verify-email': typeof VerifyEmailRoute
+  '/_authed/customers': typeof AuthedCustomersRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/projects': typeof AuthedProjectsRoute
   '/_guest/forgot-password': typeof GuestForgotPasswordRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/verify-email'
+    | '/customers'
     | '/dashboard'
     | '/projects'
     | '/forgot-password'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/verify-email'
+    | '/customers'
     | '/dashboard'
     | '/projects'
     | '/forgot-password'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/_guest'
     | '/verify-email'
+    | '/_authed/customers'
     | '/_authed/dashboard'
     | '/_authed/projects'
     | '/_guest/forgot-password'
@@ -259,6 +271,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/verify-email'
       preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/customers': {
+      id: '/_authed/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AuthedCustomersRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
@@ -355,6 +374,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedCustomersRoute: typeof AuthedCustomersRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedProjectsRoute: typeof AuthedProjectsRoute
   AuthedAcceptInvitationInvitationIdRoute: typeof AuthedAcceptInvitationInvitationIdRoute
@@ -365,6 +385,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCustomersRoute: AuthedCustomersRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedProjectsRoute: AuthedProjectsRoute,
   AuthedAcceptInvitationInvitationIdRoute:

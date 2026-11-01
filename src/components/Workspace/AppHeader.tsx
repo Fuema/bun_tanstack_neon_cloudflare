@@ -34,6 +34,13 @@ export function AppHeader({ access }: { access: WorkspaceAccess | null }) {
 						Projects
 					</Link>
 					<Link
+						to="/customers"
+						className={linkClass}
+						activeProps={{ className: activeClass }}
+					>
+						Customers
+					</Link>
+					<Link
 						to="/workspace/members"
 						className={linkClass}
 						activeProps={{ className: activeClass }}

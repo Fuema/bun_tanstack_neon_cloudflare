@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
 	bigint,
 	boolean,
@@ -6,6 +7,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // Core Better Auth Schema Tables mapped to PostgreSQL
@@ -186,4 +188,40 @@ export const project = pgTable(
 		updatedAt: timestamp("updated_at").notNull().defaultNow(),
 	},
 	(t) => [index("project_organization_id_idx").on(t.organizationId)],
+);
+
+// Customers. The tenant is the workspace (organization): every query filters by
+// tenant_id from the caller's active session, never from client input.
+export const customer = pgTable(
+	"customer",
+	{
+		id: text("id").primaryKey(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		name: text("name").notNull(),
+		email: text("email").notNull(),
+		phone: text("phone"),
+		company: text("company"),
+		// lead | active | inactive
+		status: text("status").notNull().default("lead"),
+		city: text("city"),
+		// ISO 3166-1 alpha-2 code, e.g. "US"
+		country: text("country"),
+		notes: text("notes"),
+		createdById: text("created_by_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [
+		// One customer per email address within a tenant, case-insensitive
+		uniqueIndex("customer_tenant_email_unique").on(
+			t.tenantId,
+			sql`lower(${t.email})`,
+		),
+		index("customer_tenant_created_idx").on(t.tenantId, t.createdAt),
+		index("customer_tenant_status_idx").on(t.tenantId, t.status),
+	],
 );

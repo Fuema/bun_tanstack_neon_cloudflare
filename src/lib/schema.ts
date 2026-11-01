@@ -187,3 +187,75 @@ export const projectInputSchema = z.object({
 		.trim()
 		.max(500, "Description must not exceed 500 characters"),
 });
+
+export const CUSTOMER_STATUSES = ["lead", "active", "inactive"] as const;
+export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
+
+const optionalText = (max: number, label: string) =>
+	z.string().trim().max(max, `${label} must not exceed ${max} characters`);
+
+export const customerInputSchema = z.object({
+	name: z
+		.string()
+		.trim()
+		.min(2, "Name must be at least 2 characters")
+		.max(100, "Name must not exceed 100 characters"),
+	email: emailSchema,
+	// Digits with optional +, spaces, dots, dashes and parentheses; 7-15 digits (E.164 range)
+	phone: z
+		.string()
+		.trim()
+		.max(25, "Phone must not exceed 25 characters")
+		.refine(
+			(v) =>
+				v === "" ||
+				(/^\+?[\d\s().-]+$/.test(v) &&
+					(v.match(/\d/g)?.length ?? 0) >= 7 &&
+					(v.match(/\d/g)?.length ?? 0) <= 15),
+			"Enter a valid phone number, e.g. +1 555 123 4567",
+		),
+	company: optionalText(100, "Company"),
+	status: z.enum(CUSTOMER_STATUSES, "Choose a status"),
+	city: optionalText(100, "City"),
+	// "" means no country; otherwise an ISO code (checked against the list on the server)
+	country: z
+		.string()
+		.trim()
+		.toUpperCase()
+		.regex(/^([A-Z]{2})?$/, "Choose a country from the list"),
+	notes: optionalText(2000, "Notes"),
+});
+
+export type CustomerInput = z.infer<typeof customerInputSchema>;
+
+export const CUSTOMER_SORT_COLUMNS = [
+	"name",
+	"email",
+	"company",
+	"status",
+	"country",
+	"createdAt",
+] as const;
+export const CUSTOMER_PAGE_SIZES = [10, 25, 50, 100] as const;
+
+// Table state kept in the URL (?page=2&q=acme&status=active...). Invalid values
+// fall back to defaults instead of erroring, so a hand-edited URL still works.
+export const customerSearchSchema = z.object({
+	page: z.coerce.number().int().min(1).max(10_000).catch(1).default(1),
+	pageSize: z.coerce
+		.number()
+		.refine((n) => (CUSTOMER_PAGE_SIZES as readonly number[]).includes(n))
+		.catch(10)
+		.default(10),
+	q: z.string().trim().max(100).catch("").default(""),
+	status: z.enum(CUSTOMER_STATUSES).optional().catch(undefined),
+	country: z
+		.string()
+		.regex(/^[A-Z]{2}$/)
+		.optional()
+		.catch(undefined),
+	sort: z.enum(CUSTOMER_SORT_COLUMNS).catch("createdAt").default("createdAt"),
+	dir: z.enum(["asc", "desc"]).catch("desc").default("desc"),
+});
+
+export type CustomerSearch = z.infer<typeof customerSearchSchema>;
