@@ -16,6 +16,8 @@ export const statements = {
 	order: ["create", "read", "update", "delete"],
 	// issue = finalize a draft, pay = record payment, void = cancel an issued invoice
 	invoice: ["create", "read", "update", "delete", "issue", "pay", "void"],
+	task: ["create", "read", "update", "delete"],
+	activity: ["create", "read", "update", "delete"],
 } as const;
 
 export const ac = createAccessControl(statements);
@@ -27,6 +29,8 @@ export const owner = ac.newRole({
 	product: ["create", "read", "update", "delete"],
 	order: ["create", "read", "update", "delete"],
 	invoice: ["create", "read", "update", "delete", "issue", "pay", "void"],
+	task: ["create", "read", "update", "delete"],
+	activity: ["create", "read", "update", "delete"],
 });
 
 // Like owner, but can't delete the workspace
@@ -37,6 +41,8 @@ export const admin = ac.newRole({
 	product: ["create", "read", "update", "delete"],
 	order: ["create", "read", "update", "delete"],
 	invoice: ["create", "read", "update", "delete", "issue", "pay", "void"],
+	task: ["create", "read", "update", "delete"],
+	activity: ["create", "read", "update", "delete"],
 });
 
 export const editor = ac.newRole({
@@ -46,6 +52,8 @@ export const editor = ac.newRole({
 	order: ["create", "read", "update"],
 	// Editors draft invoices; issuing, payments and voiding stay with owners/admins
 	invoice: ["create", "read", "update"],
+	task: ["create", "read", "update"],
+	activity: ["create", "read", "update"],
 });
 
 export const viewer = ac.newRole({
@@ -54,6 +62,8 @@ export const viewer = ac.newRole({
 	product: ["read"],
 	order: ["read"],
 	invoice: ["read"],
+	task: ["read"],
+	activity: ["read"],
 });
 
 export const roles = { owner, admin, editor, viewer };

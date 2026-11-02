@@ -13,10 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as AuthedCalendarRouteImport } from './routes/_authed/calendar'
 import { Route as AuthedCustomersRouteImport } from './routes/_authed/customers'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedProductsRouteImport } from './routes/_authed/products'
 import { Route as AuthedProjectsRouteImport } from './routes/_authed/projects'
+import { Route as AuthedTasksRouteImport } from './routes/_authed/tasks'
 import { Route as GuestForgotPasswordRouteImport } from './routes/_guest/forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest/login'
 import { Route as GuestResetPasswordRouteImport } from './routes/_guest/reset-password'
@@ -52,6 +54,11 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedCalendarRoute = AuthedCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedCustomersRoute = AuthedCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -70,6 +77,11 @@ const AuthedProductsRoute = AuthedProductsRouteImport.update({
 const AuthedProjectsRoute = AuthedProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedTasksRoute = AuthedTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => AuthedRoute,
 } as any)
 const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
@@ -157,10 +169,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/calendar': typeof AuthedCalendarRoute
   '/customers': typeof AuthedCustomersRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/products': typeof AuthedProductsRoute
   '/projects': typeof AuthedProjectsRoute
+  '/tasks': typeof AuthedTasksRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
@@ -181,10 +195,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/calendar': typeof AuthedCalendarRoute
   '/customers': typeof AuthedCustomersRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/products': typeof AuthedProductsRoute
   '/projects': typeof AuthedProjectsRoute
+  '/tasks': typeof AuthedTasksRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
@@ -208,10 +224,12 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/verify-email': typeof VerifyEmailRoute
+  '/_authed/calendar': typeof AuthedCalendarRoute
   '/_authed/customers': typeof AuthedCustomersRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/products': typeof AuthedProductsRoute
   '/_authed/projects': typeof AuthedProjectsRoute
+  '/_authed/tasks': typeof AuthedTasksRoute
   '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/reset-password': typeof GuestResetPasswordRoute
@@ -234,10 +252,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/verify-email'
+    | '/calendar'
     | '/customers'
     | '/dashboard'
     | '/products'
     | '/projects'
+    | '/tasks'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
@@ -258,10 +278,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/verify-email'
+    | '/calendar'
     | '/customers'
     | '/dashboard'
     | '/products'
     | '/projects'
+    | '/tasks'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
@@ -284,10 +306,12 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/_guest'
     | '/verify-email'
+    | '/_authed/calendar'
     | '/_authed/customers'
     | '/_authed/dashboard'
     | '/_authed/products'
     | '/_authed/projects'
+    | '/_authed/tasks'
     | '/_guest/forgot-password'
     | '/_guest/login'
     | '/_guest/reset-password'
@@ -344,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/calendar': {
+      id: '/_authed/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AuthedCalendarRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/customers': {
       id: '/_authed/customers'
       path: '/customers'
@@ -370,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof AuthedProjectsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/tasks': {
+      id: '/_authed/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthedTasksRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_guest/forgot-password': {
@@ -488,10 +526,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedCalendarRoute: typeof AuthedCalendarRoute
   AuthedCustomersRoute: typeof AuthedCustomersRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedProductsRoute: typeof AuthedProductsRoute
   AuthedProjectsRoute: typeof AuthedProjectsRoute
+  AuthedTasksRoute: typeof AuthedTasksRoute
   AuthedAcceptInvitationInvitationIdRoute: typeof AuthedAcceptInvitationInvitationIdRoute
   AuthedAccountSecurityRoute: typeof AuthedAccountSecurityRoute
   AuthedInvoicesInvoiceIdRoute: typeof AuthedInvoicesInvoiceIdRoute
@@ -505,10 +545,12 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCalendarRoute: AuthedCalendarRoute,
   AuthedCustomersRoute: AuthedCustomersRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedProductsRoute: AuthedProductsRoute,
   AuthedProjectsRoute: AuthedProjectsRoute,
+  AuthedTasksRoute: AuthedTasksRoute,
   AuthedAcceptInvitationInvitationIdRoute:
     AuthedAcceptInvitationInvitationIdRoute,
   AuthedAccountSecurityRoute: AuthedAccountSecurityRoute,

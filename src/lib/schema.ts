@@ -404,3 +404,116 @@ export const invoiceSearchSchema = listSearchSchema(
 export type ProductSearch = z.infer<typeof productSearchSchema>;
 export type OrderSearch = z.infer<typeof orderSearchSchema>;
 export type InvoiceSearch = z.infer<typeof invoiceSearchSchema>;
+
+// --- Tasks and activities ---------------------------------------------------
+
+export const TASK_STATUSES = [
+	"backlog",
+	"todo",
+	"in_progress",
+	"review",
+	"done",
+] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+export const TASK_PRIORITIES = ["low", "medium", "high", "urgent"] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+export const ACTIVITY_TYPES = [
+	"call",
+	"meeting",
+	"email",
+	"follow_up",
+] as const;
+export type ActivityType = (typeof ACTIVITY_TYPES)[number];
+
+// Dates travel as ISO strings; null clears the date
+const isoOrNull = z.iso
+	.datetime({ offset: true, message: "Invalid date" })
+	.nullable();
+const optionalId = (label: string) => z.uuid(`Invalid ${label}`).nullable();
+
+export const taskInputSchema = z.object({
+	title: z
+		.string()
+		.trim()
+		.min(2, "Title must be at least 2 characters")
+		.max(200, "Title must not exceed 200 characters"),
+	description: z
+		.string()
+		.trim()
+		.max(5000, "Description must not exceed 5,000 characters"),
+	status: z.enum(TASK_STATUSES, "Choose a status"),
+	priority: z.enum(TASK_PRIORITIES, "Choose a priority"),
+	assigneeId: z.string().min(1).max(64).nullable(),
+	dueAt: isoOrNull,
+	allDay: z.boolean(),
+	customerId: optionalId("customer"),
+	orderId: optionalId("order"),
+});
+export type TaskInput = z.infer<typeof taskInputSchema>;
+
+// Drop a card into a column, between two neighbours (either may be missing)
+export const moveTaskSchema = z.object({
+	id: z.uuid("Invalid task id"),
+	status: z.enum(TASK_STATUSES),
+	beforeId: z.uuid().nullable(),
+	afterId: z.uuid().nullable(),
+});
+
+export const activityInputSchema = z
+	.object({
+		type: z.enum(ACTIVITY_TYPES, "Choose a type"),
+		subject: z
+			.string()
+			.trim()
+			.min(2, "Subject must be at least 2 characters")
+			.max(200, "Subject must not exceed 200 characters"),
+		notes: z
+			.string()
+			.trim()
+			.max(5000, "Notes must not exceed 5,000 characters"),
+		startsAt: z.iso.datetime({ offset: true, message: "Choose a start date" }),
+		endsAt: isoOrNull,
+		allDay: z.boolean(),
+		completed: z.boolean(),
+		ownerId: z.string().min(1).max(64).nullable(),
+		customerId: optionalId("customer"),
+		orderId: optionalId("order"),
+	})
+	.refine((a) => !a.endsAt || new Date(a.endsAt) >= new Date(a.startsAt), {
+		path: ["endsAt"],
+		message: "End must be after the start",
+	});
+export type ActivityInput = z.infer<typeof activityInputSchema>;
+
+export const taskBoardSearchSchema = z.object({
+	q: z.string().trim().max(100).catch("").default(""),
+	// "me" or a member's user id
+	assignee: z.string().max(64).optional().catch(undefined),
+	priority: z.enum(TASK_PRIORITIES).optional().catch(undefined),
+});
+export type TaskBoardSearch = z.infer<typeof taskBoardSearchSchema>;
+
+export const CALENDAR_VIEWS = ["day", "week", "month"] as const;
+export type CalendarView = (typeof CALENDAR_VIEWS)[number];
+export const calendarSearchSchema = z.object({
+	view: z.enum(CALENDAR_VIEWS).catch("week").default("week"),
+	// YYYY-MM-DD; empty means today (resolved in the browser's time zone)
+	date: z
+		.string()
+		.regex(/^\d{4}-\d{2}-\d{2}$/)
+		.optional()
+		.catch(undefined),
+	show: z.enum(["all", "tasks", "activities"]).catch("all").default("all"),
+});
+export type CalendarSearch = z.infer<typeof calendarSearchSchema>;
+
+// The server only accepts ranges up to ~7 weeks (a month view plus padding)
+export const calendarRangeSchema = z
+	.object({
+		from: z.iso.datetime({ offset: true }),
+		to: z.iso.datetime({ offset: true }),
+	})
+	.refine((r) => {
+		const span = new Date(r.to).getTime() - new Date(r.from).getTime();
+		return span > 0 && span <= 50 * 24 * 60 * 60 * 1000;
+	}, "Invalid range");
