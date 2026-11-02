@@ -36,6 +36,13 @@
       "when": 1793578755319,
       "tag": "0004_black_invisible_woman",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793582005956,
+      "tag": "0005_powerful_franklin_richards",
+      "breakpoints": true
     }
   ]
 }

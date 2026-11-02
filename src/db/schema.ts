@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
 	bigint,
 	boolean,
+	doublePrecision,
 	index,
 	integer,
 	pgTable,
@@ -402,4 +403,91 @@ export const invoiceLine = pgTable(
 		lineTotalCents: integer("line_total_cents").notNull(),
 	},
 	(t) => [index("invoice_line_invoice_idx").on(t.invoiceId)],
+);
+
+// ---------------------------------------------------------------------------
+// Tasks (board + calendar) and CRM activities (calendar)
+// ---------------------------------------------------------------------------
+
+export const task = pgTable(
+	"task",
+	{
+		id: text("id").primaryKey(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		title: text("title").notNull(),
+		description: text("description"),
+		// backlog | todo | in_progress | review | done
+		status: text("status").notNull().default("todo"),
+		// Order within a column. Fractional, so moving a card between two others
+		// only rewrites that one card.
+		position: doublePrecision("position").notNull(),
+		// low | medium | high | urgent
+		priority: text("priority").notNull().default("medium"),
+		assigneeId: text("assignee_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		dueAt: timestamp("due_at"),
+		// All-day tasks have a date but no meaningful time
+		allDay: boolean("all_day").notNull().default(true),
+		customerId: text("customer_id").references(() => customer.id, {
+			onDelete: "set null",
+		}),
+		orderId: text("order_id").references(() => salesOrder.id, {
+			onDelete: "set null",
+		}),
+		completedAt: timestamp("completed_at"),
+		createdById: text("created_by_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [
+		index("task_tenant_status_position_idx").on(
+			t.tenantId,
+			t.status,
+			t.position,
+		),
+		index("task_tenant_due_idx").on(t.tenantId, t.dueAt),
+		index("task_tenant_assignee_idx").on(t.tenantId, t.assigneeId),
+	],
+);
+
+export const activity = pgTable(
+	"activity",
+	{
+		id: text("id").primaryKey(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		// call | meeting | email | follow_up
+		type: text("type").notNull(),
+		subject: text("subject").notNull(),
+		notes: text("notes"),
+		startsAt: timestamp("starts_at").notNull(),
+		endsAt: timestamp("ends_at"),
+		allDay: boolean("all_day").notNull().default(false),
+		completed: boolean("completed").notNull().default(false),
+		// Who holds the call/meeting
+		ownerId: text("owner_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		customerId: text("customer_id").references(() => customer.id, {
+			onDelete: "set null",
+		}),
+		orderId: text("order_id").references(() => salesOrder.id, {
+			onDelete: "set null",
+		}),
+		createdById: text("created_by_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [
+		index("activity_tenant_starts_idx").on(t.tenantId, t.startsAt),
+		index("activity_tenant_customer_idx").on(t.tenantId, t.customerId),
+	],
 );

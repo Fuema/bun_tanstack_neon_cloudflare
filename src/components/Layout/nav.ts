@@ -1,6 +1,8 @@
 import {
+	CalendarDays,
 	FileText,
 	FolderKanban,
+	KanbanSquare,
 	LayoutDashboard,
 	type LucideIcon,
 	Package,
@@ -25,6 +27,13 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
 			{ title: "Products", to: "/products", icon: Package },
 			{ title: "Orders", to: "/orders", icon: ShoppingCart },
 			{ title: "Invoices", to: "/invoices", icon: FileText },
+		],
+	},
+	{
+		label: "Planning",
+		items: [
+			{ title: "Tasks", to: "/tasks", icon: KanbanSquare },
+			{ title: "Calendar", to: "/calendar", icon: CalendarDays },
 		],
 	},
 	{
