@@ -4,6 +4,9 @@ Multi-tenant CRM/ERP on TanStack Start + Cloudflare Workers + Neon Postgres +
 Better Auth. **Read `specification.md` first**: architecture, data model,
 permissions, conventions, known pitfalls and the pending-task list live there.
 
+**Frozen reference:** new product work happens in the `Generic_CRM` repository,
+designed in `docs/generic-crm-specification.md`. Here: fixes and that design doc only.
+
 ## Starting a session
 - Use the `project-navigator` agent (or §14 of the spec) to see where things stand.
 - Ask the owner which pending task (spec §12) to work on; don't start P3 ideas unprompted.
