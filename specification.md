@@ -5,7 +5,7 @@
 > pending. **Read it before changing anything; update it in the same PR as any
 > change it describes** (see the `spec-keeper` agent).
 >
-> Last updated: 2026-11-02 · `main` at `5c8435c` (PR #12, specification and subagents)
+> Last updated: 2026-11-02 · `main` at `bef6d45` (PR #13, skills and real email)
 
 ---
 
@@ -162,6 +162,7 @@ Adding a resource = one line in `statements` plus the four roles. Owner is only 
 
 | Route | What it does |
 |---|---|
+| `/` | No page: redirects on the server to `/dashboard` when signed in, otherwise to `/login` |
 | `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/two-factor`, `/verify-email` | Auth flows; theme switch and logo on the card |
 | `/dashboard` | KPI tiles (customers, new customers vs previous 30 days, active rate, team), new customers per month, customers by status, top countries; every chart has a table view; palette validated for color-vision deficiency (tokens `--viz-*` in `styles.css`) |
 | `/customers` | TanStack Table v9 in manual mode: search, status/country filters, sorting, pagination in Postgres; state in the URL; create/edit dialog |
@@ -284,4 +285,5 @@ These replaced the old `agents/` folder. `AGENTS.md` (TanStack Intent skills) mo
 | #10 | Email dev fallback; products, orders, invoices; sidebar shell and dark mode |
 | #11 | Task board (dnd-kit) and activity calendar |
 | #12 | Specification, CLAUDE.md, subagents, `bun run validate` / `check:bundle` |
-| (this PR) | Real email via Resend confirmed in dev; domain verification left as a P1 task; `agents/` docs became personal skills (incl. new `setup-resend-email`), `AGENTS.md` moved to the root |
+| #13 | Real email via Resend confirmed in dev; domain verification left as a P1 task; `agents/` docs became personal skills (incl. new `setup-resend-email`), `AGENTS.md` moved to the root |
+| (this PR) | `/` redirects to the dashboard or sign-in instead of the starter page |
