@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { AppHeader } from "#/components/Workspace/AppHeader";
+import { AppSidebar } from "#/components/Layout/AppSidebar";
+import { SiteHeader } from "#/components/Layout/SiteHeader";
+import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
 import { InvitationBanner } from "#/components/Workspace/InvitationBanner";
 import { getSession } from "#/lib/auth-session";
 import { getWorkspaceAccess } from "#/lib/authz";
@@ -20,14 +22,19 @@ export const Route = createFileRoute("/_authed")({
 });
 
 function AuthedLayout() {
-	const { access } = Route.useRouteContext();
+	const { session, access } = Route.useRouteContext();
 	return (
-		<div className="min-h-svh bg-muted/40">
-			<AppHeader access={access} />
-			<InvitationBanner />
-			<main>
-				<Outlet />
-			</main>
-		</div>
+		<SidebarProvider>
+			<AppSidebar access={access} />
+			<SidebarInset className="bg-muted/40 print:bg-white">
+				<SiteHeader user={session.user} role={access?.role} />
+				<div className="print:hidden">
+					<InvitationBanner />
+				</div>
+				<main className="flex-1">
+					<Outlet />
+				</main>
+			</SidebarInset>
+		</SidebarProvider>
 	);
 }
