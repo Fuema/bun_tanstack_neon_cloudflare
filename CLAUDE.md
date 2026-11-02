@@ -21,7 +21,7 @@ browser check for UI changes (curl doesn't run JavaScript).
 
 ## Git workflow (owner's standing preference)
 - Branch per change from `main`; never commit to `main`.
-- Follow the `commit-and-push` skill (personal, `~/.claude/skills/`): explicit
+- Follow the `commit-and-push` skill (`.claude/skills/`): explicit
   staging, secret scan, Conventional Commit, **ask before committing and again
   before pushing**. `gh` is not installed: give the owner the PR link and a
   pasteable description. In this repo on top of it:
@@ -32,8 +32,10 @@ browser check for UI changes (curl doesn't run JavaScript).
 
 ## Agents and skills
 - `.claude/agents/`: this repo's subagents (read-only checks and reports; see spec §13).
-- Personal skills in `~/.claude/skills/` (not in git, reusable in any project):
-  `commit-and-push`, `setup-resend-email`, `setup-neon-db`, `setup-neon-auth`.
+- `.claude/skills/`: general procedures that ask the owner mid-way (`commit-and-push`,
+  `setup-resend-email`, `setup-neon-db`, `setup-neon-auth`). This repo holds the
+  master copy; the owner copies them to `~/.claude/skills/` to use them in other projects.
+  Edit them here, then copy, so the two don't drift.
 - `AGENTS.md`: TanStack Intent skill loading.
 
 ## Environment notes
