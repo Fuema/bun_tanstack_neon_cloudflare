@@ -6,7 +6,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "bun --bun vite dev --port 3000",
+    "dev": "vite dev --port 3000",
     "generate-routes": "bunx tsr generate",
     "build": "bun --bun vite build && cp instrument.server.mjs .output/server",
     "preview": "bun --bun vite preview",
