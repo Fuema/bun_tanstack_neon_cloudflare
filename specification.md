@@ -5,7 +5,7 @@
 > pending. **Read it before changing anything; update it in the same PR as any
 > change it describes** (see the `spec-keeper` agent).
 >
-> Last updated: 2026-11-03 · `main` at `9c23633` (PR #11, task board and calendar)
+> Last updated: 2026-11-02 · `main` at `5c8435c` (PR #12, specification and subagents)
 
 ---
 
@@ -69,7 +69,7 @@ Test accounts in the dev database: `jose@aaa.com`, `luis@aaa.com` (passwords are
 | `DATABASE_URL` | yes | Neon connection string (server only) |
 | `BETTER_AUTH_SECRET` | yes | Session signing secret |
 | `BETTER_AUTH_URL` | yes | Public base URL (`http://localhost:3000` in dev). Passkeys and OAuth callbacks depend on it |
-| `RESEND_API_KEY`, `EMAIL_FROM` | for real email | Without them emails print to the console in dev and throw in production |
+| `RESEND_API_KEY`, `EMAIL_FROM` | for real email | Without them emails print to the console in dev and throw in production. Dev uses the test sender `EMAIL_FROM="My CRM <onboarding@resend.dev>"`, which only delivers to the Resend account owner; other recipients are rejected and fall back to the console. Free plan: 100 emails/day, 3,000/month |
 | `GOOGLE_CLIENT_ID/SECRET`, `GITHUB_CLIENT_ID/SECRET` | optional | Social buttons appear only when both values of a provider are set |
 | `VITE_SENTRY_*`, `SENTRY_AUTH_TOKEN` | optional | Present but Sentry is not wired up yet (§12) |
 
@@ -92,8 +92,8 @@ src/
   db/index.ts        Neon HTTP client
 scripts/             seed scripts, email test, bundle check
 drizzle/             SQL migrations 0000-0005 (all applied to the dev database)
-agents/              prompt-style agent docs (commit-and-push, Neon setup)
 .claude/agents/      Claude Code subagents for this repo (§13)
+AGENTS.md            TanStack Intent skill loading
 ```
 
 ### Request flow for a protected page
@@ -203,7 +203,7 @@ App shell: collapsible sidebar (Overview · Sales · Planning · Work · Workspa
 ## 11. Workflow
 
 - **Branch per change** (`feat/…`, `fix/…`, `docs/…`, `chore/…`) from `main`; never commit to `main`.
-- Procedure in `agents/commit-and-push.md`: `bun run validate` → review → explicit staging (never `git add .`) → secret scan → Conventional Commit → **confirm before commit** → **confirm again before push** → PR description for the owner to paste (`gh` is not installed).
+- Procedure: the personal `commit-and-push` skill plus the repo rules in `CLAUDE.md`: `bun run validate` → review → explicit staging (never `git add .`) → secret scan → Conventional Commit → **confirm before commit** → **confirm again before push** → PR description for the owner to paste (`gh` is not installed).
 - Migrations: generate, review the SQL (additive vs destructive), **ask before `db:migrate`**, verify tables afterwards. Migrations run against the dev database in `.env.local`.
 - After a PR is merged: switch to `main`, pull, delete the local branch; delete remote branches only when asked.
 - Update this file in the same PR when behaviour, data model, conventions or pending tasks change.
@@ -211,7 +211,8 @@ App shell: collapsible sidebar (Overview · Sales · Planning · Work · Workspa
 ## 12. Pending tasks
 
 ### P1 — needed before production
-- [ ] **Real email:** add `RESEND_API_KEY` and `EMAIL_FROM` (test sender `onboarding@resend.dev` only delivers to the Resend account owner), run `bun run email:test <owner-email>`, then verify a domain for production.
+- [x] **Real email in dev:** `RESEND_API_KEY` and `EMAIL_FROM` (test sender `onboarding@resend.dev`) set in `.env.local`; `bun run email:test` delivered to the Resend account owner and the owner confirmed it on 2026-11-02.
+- [ ] **Verify a sending domain in Resend** (DNS records), then switch `EMAIL_FROM` to an address on it so invitations and resets reach any recipient. Needed before production.
 - [ ] **Deploy to Cloudflare:** set secrets with `wrangler secret put` (`DATABASE_URL`, `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, OAuth), set `BETTER_AUTH_URL` to the real domain (passkeys depend on it), rename the worker (`wrangler.jsonc` name is still `tanstack-start-app`), decide which Neon branch production uses and apply migrations there, then test sign-in, passkeys and invitations live.
 - [ ] **Automated tests:** there is no test runner yet. Money, calendar and permission checks were run as ad-hoc scripts; turn them into `bun test` suites, plus API tests for tenant isolation and status machines.
 - [ ] **Verify rate limiting without a proxy IP header** (local dev has no `cf-connecting-ip`; confirm whether limits apply).
@@ -251,7 +252,16 @@ Claude Code subagents in `.claude/agents/` (use them; they encode this spec):
 | `security-reviewer` | Review a diff for tenant isolation, permissions, validation and bundle leaks (read-only) |
 | `spec-keeper` | Update this file after a change (data model, features, pending tasks, changelog) |
 
-Prompt-style docs in `agents/`: `commit-and-push.md` (release procedure), `setup_neon_db.md`, `setup_neon_auth.md`, `AGENTS.md` (TanStack Intent skills).
+Subagents are for checks and reports; they run on their own and can't stop to ask the owner a question. Procedures that need the owner's input mid-way are **personal skills** in `~/.claude/skills/` (on the owner's machine, not in git, available in every project; run as `/<name>`):
+
+| Skill | Use it to |
+|---|---|
+| `commit-and-push` | Branch, validate, stage, secret-scan, commit and push with two confirmations (repo additions in `CLAUDE.md`) |
+| `setup-resend-email` | Add Resend email to any app: env vars, server-only module, dev fallback, test script, domain verification |
+| `setup-neon-db` | Link an app to a Neon project and provision Postgres |
+| `setup-neon-auth` | Add Neon Auth (Managed Better Auth); recommends self-managed Better Auth when MFA/passkeys are needed, as here |
+
+These replaced the old `agents/` folder. `AGENTS.md` (TanStack Intent skills) moved to the repo root. On a new machine the skills must be copied to `~/.claude/skills/`; they're not restored by cloning.
 
 ## 14. How to resume (checklist)
 
@@ -273,4 +283,5 @@ Prompt-style docs in `agents/`: `commit-and-push.md` (release procedure), `setup
 | #9 | Customer CRUD (server-side table); KPI dashboard |
 | #10 | Email dev fallback; products, orders, invoices; sidebar shell and dark mode |
 | #11 | Task board (dnd-kit) and activity calendar |
-| (this PR) | Specification, CLAUDE.md, subagents, `bun run validate` / `check:bundle` |
+| #12 | Specification, CLAUDE.md, subagents, `bun run validate` / `check:bundle` |
+| (this PR) | Real email via Resend confirmed in dev; domain verification left as a P1 task; `agents/` docs became personal skills (incl. new `setup-resend-email`), `AGENTS.md` moved to the root |

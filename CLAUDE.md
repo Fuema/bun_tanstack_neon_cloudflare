@@ -21,11 +21,20 @@ browser check for UI changes (curl doesn't run JavaScript).
 
 ## Git workflow (owner's standing preference)
 - Branch per change from `main`; never commit to `main`.
-- Follow `agents/commit-and-push.md`: explicit staging, secret scan, Conventional
-  Commit, **ask before committing and again before pushing**. `gh` is not
-  installed: give the owner the PR link and a pasteable description.
+- Follow the `commit-and-push` skill (personal, `~/.claude/skills/`): explicit
+  staging, secret scan, Conventional Commit, **ask before committing and again
+  before pushing**. `gh` is not installed: give the owner the PR link and a
+  pasteable description. In this repo on top of it:
+  - validate with `bun run validate`; there are no known failures, so any failure blocks the commit
+  - run the `security-reviewer` subagent for changes to server functions, routes, permissions, auth, the schema or seeds
+  - code, config, dependency or schema changes include the `specification.md` update (`spec-keeper` subagent)
 - Ask before applying migrations (`migration-guard` agent).
-- Update `specification.md` in the same PR (`spec-keeper` agent).
+
+## Agents and skills
+- `.claude/agents/`: this repo's subagents (read-only checks and reports; see spec §13).
+- Personal skills in `~/.claude/skills/` (not in git, reusable in any project):
+  `commit-and-push`, `setup-resend-email`, `setup-neon-db`, `setup-neon-auth`.
+- `AGENTS.md`: TanStack Intent skill loading.
 
 ## Environment notes
 - Windows 11, PowerShell + Git Bash, Bun 1.4. `bun run dev` = Vite on Node, port 3000.
