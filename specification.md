@@ -5,7 +5,13 @@
 > pending. **Read it before changing anything; update it in the same PR as any
 > change it describes** (see the `spec-keeper` agent).
 >
-> Last updated: 2026-11-02 · `main` at `bef6d45` (PR #13, skills and real email)
+> Last updated: 2026-11-02 · `main` at `bbae34a` (PR #14, home redirect and skills)
+>
+> **This project is now a frozen reference.** Development continues in a new
+> repository, `Generic_CRM`, designed in
+> [`docs/generic-crm-specification.md`](docs/generic-crm-specification.md). Its
+> phase 0 ports this project's foundation (auth, workspaces, permissions, app
+> shell, email, tooling, conventions). Only fixes go here from now on.
 
 ---
 
@@ -95,6 +101,7 @@ drizzle/             SQL migrations 0000-0005 (all applied to the dev database)
 .claude/agents/      Claude Code subagents for this repo (§13)
 .claude/skills/      general skills (commit-and-push, setup-*), master copy (§13)
 AGENTS.md            TanStack Intent skill loading
+docs/                generic-crm-specification.md: design of the successor project
 ```
 
 ### Request flow for a protected page
@@ -228,7 +235,8 @@ App shell: collapsible sidebar (Overview · Sales · Planning · Work · Workspa
 - [ ] Delete merged remote branches: `chore/dev-script-and-format`, `chore/line-endings`, `feat/customers`, `feat/orders-invoices`, `feat/tasks`; delete local `feat/orders-invoices`.
 - [ ] Add a scheduled cleanup for expired `rate_limit` rows and old `verification` rows.
 
-### P3 — product ideas (not started, confirm with the owner first)
+### P3 — product ideas (superseded)
+The product roadmap now lives in [`docs/generic-crm-specification.md`](docs/generic-crm-specification.md) and will be built in `Generic_CRM`. The ideas below are kept for reference; most are covered there.
 - Customer detail page (orders, invoices, tasks, activities per customer).
 - Dashboard revenue KPIs (orders/invoices per month, receivables, overdue amount).
 - Invoice PDF file and "send invoice by email"; partial payments; credit notes.
@@ -289,4 +297,5 @@ The skills are general (not tied to this app). This repo is their **master copy*
 | #11 | Task board (dnd-kit) and activity calendar |
 | #12 | Specification, CLAUDE.md, subagents, `bun run validate` / `check:bundle` |
 | #13 | Real email via Resend confirmed in dev; domain verification left as a P1 task; `agents/` docs became personal skills (incl. new `setup-resend-email`), `AGENTS.md` moved to the root |
-| (this PR) | `/` redirects to the dashboard or sign-in instead of the starter page; the four skills versioned in `.claude/skills/` |
+| #14 | `/` redirects to the dashboard or sign-in instead of the starter page; the four skills versioned in `.claude/skills/` |
+| (this PR) | Generic CRM design (`docs/generic-crm-specification.md`); this project marked as frozen reference |
