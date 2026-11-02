@@ -18,14 +18,20 @@ async function sendEmail({ to, subject, html, text }: Email) {
 	const apiKey = process.env.RESEND_API_KEY;
 	const from = process.env.EMAIL_FROM;
 
+	const isProduction = process.env.NODE_ENV === "production";
+	// Development fallback: print the email so links and codes can still be used
+	const printToConsole = (reason: string) =>
+		console.info(
+			`[email:dev] ${reason}\n[email:dev] to=${to} subject="${subject}"\n${text}`,
+		);
+
 	if (!apiKey || !from) {
-		if (process.env.NODE_ENV === "production") {
+		if (isProduction) {
 			throw new Error(
 				"RESEND_API_KEY and EMAIL_FROM must be set in production",
 			);
 		}
-		// Development fallback: print the email so links and codes can still be used
-		console.info(`[email:dev] to=${to} subject="${subject}"\n${text}`);
+		printToConsole("Resend not configured, printing instead");
 		return;
 	}
 
@@ -39,6 +45,15 @@ async function sendEmail({ to, subject, html, text }: Email) {
 	});
 
 	if (!response.ok) {
+		// Resend's test sender (onboarding@resend.dev) only delivers to the account
+		// owner and rejects other recipients with 403. In development, keep test
+		// accounts usable by printing the email instead of failing the request.
+		if (!isProduction) {
+			printToConsole(
+				`Resend rejected the email (HTTP ${response.status}), printing instead`,
+			);
+			return;
+		}
 		// Don't log the body: it can echo the recipient address
 		throw new Error(`Resend rejected the email (HTTP ${response.status})`);
 	}
@@ -110,5 +125,18 @@ export function sendInvitationEmail(
 			`<p style="color:#3f3f46">${escapeHtml(inviterName)} invited you to join <strong>${escapeHtml(workspaceName)}</strong> as <strong>${escapeHtml(role)}</strong>. The invitation expires in 48 hours.</p>${button(url, "Accept invitation")}`,
 		),
 		text: `${inviterName} invited you to join ${workspaceName} on ${APP_NAME} as ${role}: ${url}\nThe invitation expires in 48 hours.`,
+	});
+}
+
+// Used by `bun run email:test` to confirm the Resend setup end to end
+export function sendTestEmail(to: string) {
+	return sendEmail({
+		to,
+		subject: `Test email from ${APP_NAME}`,
+		html: layout(
+			"Email is working",
+			`<p style="color:#3f3f46">If you can read this, ${APP_NAME} can send verification, password-reset, sign-in code and invitation emails.</p>`,
+		),
+		text: `Email is working: ${APP_NAME} can send verification, password-reset, sign-in code and invitation emails.`,
 	});
 }

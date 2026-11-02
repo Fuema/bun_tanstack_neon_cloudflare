@@ -16,13 +16,16 @@ import {
 } from "#/components/ui/card";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
+import { BillingSettings } from "#/components/Workspace/BillingSettings";
 import { RoleBadge } from "#/components/Workspace/RoleBadge";
 import { authClient, authErrorMessage } from "#/lib/auth-client";
 import type { WorkspaceAccess } from "#/lib/authz";
+import { getBillingSettings } from "#/lib/billing";
 import { workspaceNameSchema } from "#/lib/schema";
 
 // Protected by the _authed layout guard; Better Auth re-checks every action server-side
 export const Route = createFileRoute("/_authed/workspace/settings")({
+	loader: () => getBillingSettings(),
 	component: SettingsPage,
 });
 
@@ -121,6 +124,7 @@ function RenameForm({
 function SettingsPage() {
 	const router = useRouter();
 	const { access } = Route.useRouteContext();
+	const billing = Route.useLoaderData();
 	const [status, setStatus] = useState<Status>(null);
 	const [confirmName, setConfirmName] = useState("");
 	const [pending, setPending] = useState(false);
@@ -186,6 +190,11 @@ function SettingsPage() {
 					</CardContent>
 				</Card>
 			) : null}
+
+			<BillingSettings
+				settings={billing}
+				canEdit={access.can.updateWorkspace}
+			/>
 
 			<Card>
 				<CardHeader>

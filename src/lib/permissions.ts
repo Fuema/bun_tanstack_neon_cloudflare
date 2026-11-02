@@ -12,6 +12,10 @@ export const statements = {
 	...defaultStatements,
 	project: ["create", "read", "update", "delete"],
 	customer: ["create", "read", "update", "delete"],
+	product: ["create", "read", "update", "delete"],
+	order: ["create", "read", "update", "delete"],
+	// issue = finalize a draft, pay = record payment, void = cancel an issued invoice
+	invoice: ["create", "read", "update", "delete", "issue", "pay", "void"],
 } as const;
 
 export const ac = createAccessControl(statements);
@@ -20,6 +24,9 @@ export const owner = ac.newRole({
 	...ownerAc.statements,
 	project: ["create", "read", "update", "delete"],
 	customer: ["create", "read", "update", "delete"],
+	product: ["create", "read", "update", "delete"],
+	order: ["create", "read", "update", "delete"],
+	invoice: ["create", "read", "update", "delete", "issue", "pay", "void"],
 });
 
 // Like owner, but can't delete the workspace
@@ -27,16 +34,26 @@ export const admin = ac.newRole({
 	...adminAc.statements,
 	project: ["create", "read", "update", "delete"],
 	customer: ["create", "read", "update", "delete"],
+	product: ["create", "read", "update", "delete"],
+	order: ["create", "read", "update", "delete"],
+	invoice: ["create", "read", "update", "delete", "issue", "pay", "void"],
 });
 
 export const editor = ac.newRole({
 	project: ["create", "read", "update"],
 	customer: ["create", "read", "update"],
+	product: ["create", "read", "update"],
+	order: ["create", "read", "update"],
+	// Editors draft invoices; issuing, payments and voiding stay with owners/admins
+	invoice: ["create", "read", "update"],
 });
 
 export const viewer = ac.newRole({
 	project: ["read"],
 	customer: ["read"],
+	product: ["read"],
+	order: ["read"],
+	invoice: ["read"],
 });
 
 export const roles = { owner, admin, editor, viewer };
@@ -58,15 +75,23 @@ export const ROLE_LABELS: Record<
 	admin: {
 		label: "Admin",
 		description:
-			"Manage members, invitations, settings, projects and customers",
+			"Manage members and settings; full control of all data, including issuing invoices",
 	},
 	editor: {
 		label: "Editor",
-		description: "Create, view and edit projects and customers",
+		description:
+			"Create and edit projects, customers, products, orders and draft invoices",
 	},
-	viewer: { label: "Viewer", description: "View projects and customers only" },
+	viewer: { label: "Viewer", description: "View everything, change nothing" },
 };
 
 export type Permissions = {
 	[K in keyof typeof statements]?: (typeof statements)[K][number][];
 };
+
+// Checks a role against the table above without a server round trip. Used only
+// to show or hide UI; the server enforces the same rules on every request.
+export function roleCan(role: string | undefined, permissions: Permissions) {
+	if (!role || !(role in roles)) return false;
+	return roles[role as WorkspaceRole].authorize(permissions as never).success;
+}
