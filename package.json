@@ -23,7 +23,10 @@
     "db:seed:customers": "bun scripts/seed-customers.ts",
     "email:test": "bun scripts/send-test-email.ts",
     "db:seed:sales": "bun scripts/seed-sales.ts",
-    "db:seed:planning": "bun scripts/seed-planning.ts"
+    "db:seed:planning": "bun scripts/seed-planning.ts",
+    "typecheck": "tsc --noEmit",
+    "check:bundle": "bun run build && bun scripts/check-bundle.ts",
+    "validate": "bun run typecheck && bun run check && bun run check:bundle"
   },
   "dependencies": {
     "@better-auth/passkey": "1.7.14",

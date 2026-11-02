@@ -53,6 +53,8 @@ Pick validation commands in this order of preference:
 
 Write down the exact commands you picked. They go in the commit message and the PR.
 
+**In this repository:** run `bun run validate` (typecheck, Biome, build and the browser-bundle check `check:bundle`). There are no known failures; any failure blocks the commit. The `validator` subagent (`.claude/agents/validator.md`) runs this and the scans in step 6.
+
 ### 3. Validate (definition of done)
 Run every command from step 2 and record each exit code.
 - All pass → continue.
@@ -76,6 +78,7 @@ git diff --stat
   - a dependency manifest changed without its lockfile, or the reverse
 - Ask about files that expose identifiers or infrastructure details (org or project IDs, internal hostnames), even when they aren't secrets.
 - If the changes mix unrelated work, propose splitting them into several branches/PRs.
+- **In this repository:** for changes to server functions, routes, permissions, auth, the schema or seed scripts, run the `security-reviewer` subagent and resolve its findings first. For UI changes, confirm a manual browser check happened (builds and curl don't run browser JavaScript); if it didn't, say so in the commit message.
 
 ### 5. Create the feature branch
 Name it `<type>/<short-kebab-summary>`, using the same `type` as the commit (step 7), e.g. `feat/employee-search`, `fix/login-redirect`, `build/neon-config`.
@@ -94,10 +97,12 @@ git diff --cached --stat
 ```
 Secret scan: if the project has a script for it (`check:secrets`, `gitleaks`, `secretlint`), run it. Otherwise scan the staged diff:
 ```powershell
-git diff --cached -U0 | Select-String -CaseSensitive:$false -Pattern '(postgres(ql)?|mysql|mongodb(\+srv)?)://\S+:\S+@|api[_-]?key\s*[:=]|secret\s*[:=]|password\s*[:=]|token\s*[:=]|-----BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|sk_(live|test)_|ghp_[A-Za-z0-9]{20,}|xox[bp]-|npg_[A-Za-z0-9]+'
+git diff --cached -U0 | Select-String -CaseSensitive:$false -Pattern '(postgres(ql)?|mysql|mongodb(\+srv)?)://\S+:\S+@|api[_-]?key\s*[:=]|secret\s*[:=]|password\s*[:=]|token\s*[:=]|-----BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|sk_(live|test)_|ghp_[A-Za-z0-9]{20,}|\bre_[A-Za-z0-9]{20,}|xox[bp]-|npg_[A-Za-z0-9]+'
 ```
-- Any hit → unstage the offending files (`git restore --staged <file>`), report, stop.
+- Review each hit before acting: schema column or form field names (`password: text(...)`, `token: …`) are false positives; real values are not.
+- Any real hit → unstage the offending files (`git restore --staged <file>`), report, stop.
 - If the agent rules file requires a change-log entry, the staged diff must contain it. Missing → stop and ask the developer to add it.
+- **In this repository:** code, config, dependency or schema changes must include the matching update to `specification.md` (the `spec-keeper` subagent does it). Missing → stop and add it.
 
 ### 7. Draft the commit message (Conventional Commits)
 ```
