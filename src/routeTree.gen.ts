@@ -15,6 +15,7 @@ import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AuthedCustomersRouteImport } from './routes/_authed/customers'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedProductsRouteImport } from './routes/_authed/products'
 import { Route as AuthedProjectsRouteImport } from './routes/_authed/projects'
 import { Route as GuestForgotPasswordRouteImport } from './routes/_guest/forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest/login'
@@ -23,6 +24,11 @@ import { Route as GuestSignupRouteImport } from './routes/_guest/signup'
 import { Route as GuestTwoFactorRouteImport } from './routes/_guest/two-factor'
 import { Route as AuthedAcceptInvitationInvitationIdRouteImport } from './routes/_authed/accept-invitation.$invitationId'
 import { Route as AuthedAccountSecurityRouteImport } from './routes/_authed/account/security'
+import { Route as AuthedInvoicesIndexRouteImport } from './routes/_authed/invoices/index'
+import { Route as AuthedInvoicesInvoiceIdRouteImport } from './routes/_authed/invoices/$invoiceId'
+import { Route as AuthedOrdersIndexRouteImport } from './routes/_authed/orders/index'
+import { Route as AuthedOrdersOrderIdRouteImport } from './routes/_authed/orders/$orderId'
+import { Route as AuthedOrdersNewRouteImport } from './routes/_authed/orders/new'
 import { Route as AuthedWorkspaceMembersRouteImport } from './routes/_authed/workspace/members'
 import { Route as AuthedWorkspaceNewRouteImport } from './routes/_authed/workspace/new'
 import { Route as AuthedWorkspaceSettingsRouteImport } from './routes/_authed/workspace/settings'
@@ -54,6 +60,11 @@ const AuthedCustomersRoute = AuthedCustomersRouteImport.update({
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProductsRoute = AuthedProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedProjectsRoute = AuthedProjectsRouteImport.update({
@@ -97,6 +108,31 @@ const AuthedAccountSecurityRoute = AuthedAccountSecurityRouteImport.update({
   path: '/account/security',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedInvoicesIndexRoute = AuthedInvoicesIndexRouteImport.update({
+  id: '/invoices/',
+  path: '/invoices/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedInvoicesInvoiceIdRoute = AuthedInvoicesInvoiceIdRouteImport.update({
+  id: '/invoices/$invoiceId',
+  path: '/invoices/$invoiceId',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedOrdersIndexRoute = AuthedOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedOrdersOrderIdRoute = AuthedOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedOrdersNewRoute = AuthedOrdersNewRouteImport.update({
+  id: '/orders/new',
+  path: '/orders/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedWorkspaceMembersRoute = AuthedWorkspaceMembersRouteImport.update({
   id: '/workspace/members',
   path: '/workspace/members',
@@ -123,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof VerifyEmailRoute
   '/customers': typeof AuthedCustomersRoute
   '/dashboard': typeof AuthedDashboardRoute
+  '/products': typeof AuthedProductsRoute
   '/projects': typeof AuthedProjectsRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
@@ -131,16 +168,22 @@ export interface FileRoutesByFullPath {
   '/two-factor': typeof GuestTwoFactorRoute
   '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/account/security': typeof AuthedAccountSecurityRoute
+  '/invoices/$invoiceId': typeof AuthedInvoicesInvoiceIdRoute
+  '/orders/$orderId': typeof AuthedOrdersOrderIdRoute
+  '/orders/new': typeof AuthedOrdersNewRoute
   '/workspace/members': typeof AuthedWorkspaceMembersRoute
   '/workspace/new': typeof AuthedWorkspaceNewRoute
   '/workspace/settings': typeof AuthedWorkspaceSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/invoices/': typeof AuthedInvoicesIndexRoute
+  '/orders/': typeof AuthedOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/verify-email': typeof VerifyEmailRoute
   '/customers': typeof AuthedCustomersRoute
   '/dashboard': typeof AuthedDashboardRoute
+  '/products': typeof AuthedProductsRoute
   '/projects': typeof AuthedProjectsRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
@@ -149,10 +192,15 @@ export interface FileRoutesByTo {
   '/two-factor': typeof GuestTwoFactorRoute
   '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/account/security': typeof AuthedAccountSecurityRoute
+  '/invoices/$invoiceId': typeof AuthedInvoicesInvoiceIdRoute
+  '/orders/$orderId': typeof AuthedOrdersOrderIdRoute
+  '/orders/new': typeof AuthedOrdersNewRoute
   '/workspace/members': typeof AuthedWorkspaceMembersRoute
   '/workspace/new': typeof AuthedWorkspaceNewRoute
   '/workspace/settings': typeof AuthedWorkspaceSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/invoices': typeof AuthedInvoicesIndexRoute
+  '/orders': typeof AuthedOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,6 +210,7 @@ export interface FileRoutesById {
   '/verify-email': typeof VerifyEmailRoute
   '/_authed/customers': typeof AuthedCustomersRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
+  '/_authed/products': typeof AuthedProductsRoute
   '/_authed/projects': typeof AuthedProjectsRoute
   '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
@@ -170,10 +219,15 @@ export interface FileRoutesById {
   '/_guest/two-factor': typeof GuestTwoFactorRoute
   '/_authed/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/_authed/account/security': typeof AuthedAccountSecurityRoute
+  '/_authed/invoices/$invoiceId': typeof AuthedInvoicesInvoiceIdRoute
+  '/_authed/orders/$orderId': typeof AuthedOrdersOrderIdRoute
+  '/_authed/orders/new': typeof AuthedOrdersNewRoute
   '/_authed/workspace/members': typeof AuthedWorkspaceMembersRoute
   '/_authed/workspace/new': typeof AuthedWorkspaceNewRoute
   '/_authed/workspace/settings': typeof AuthedWorkspaceSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed/invoices/': typeof AuthedInvoicesIndexRoute
+  '/_authed/orders/': typeof AuthedOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,6 +236,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/customers'
     | '/dashboard'
+    | '/products'
     | '/projects'
     | '/forgot-password'
     | '/login'
@@ -190,16 +245,22 @@ export interface FileRouteTypes {
     | '/two-factor'
     | '/accept-invitation/$invitationId'
     | '/account/security'
+    | '/invoices/$invoiceId'
+    | '/orders/$orderId'
+    | '/orders/new'
     | '/workspace/members'
     | '/workspace/new'
     | '/workspace/settings'
     | '/api/auth/$'
+    | '/invoices/'
+    | '/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/verify-email'
     | '/customers'
     | '/dashboard'
+    | '/products'
     | '/projects'
     | '/forgot-password'
     | '/login'
@@ -208,10 +269,15 @@ export interface FileRouteTypes {
     | '/two-factor'
     | '/accept-invitation/$invitationId'
     | '/account/security'
+    | '/invoices/$invoiceId'
+    | '/orders/$orderId'
+    | '/orders/new'
     | '/workspace/members'
     | '/workspace/new'
     | '/workspace/settings'
     | '/api/auth/$'
+    | '/invoices'
+    | '/orders'
   id:
     | '__root__'
     | '/'
@@ -220,6 +286,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/_authed/customers'
     | '/_authed/dashboard'
+    | '/_authed/products'
     | '/_authed/projects'
     | '/_guest/forgot-password'
     | '/_guest/login'
@@ -228,10 +295,15 @@ export interface FileRouteTypes {
     | '/_guest/two-factor'
     | '/_authed/accept-invitation/$invitationId'
     | '/_authed/account/security'
+    | '/_authed/invoices/$invoiceId'
+    | '/_authed/orders/$orderId'
+    | '/_authed/orders/new'
     | '/_authed/workspace/members'
     | '/_authed/workspace/new'
     | '/_authed/workspace/settings'
     | '/api/auth/$'
+    | '/_authed/invoices/'
+    | '/_authed/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -284,6 +356,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/products': {
+      id: '/_authed/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof AuthedProductsRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/projects': {
@@ -342,6 +421,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAccountSecurityRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/invoices/': {
+      id: '/_authed/invoices/'
+      path: '/invoices'
+      fullPath: '/invoices/'
+      preLoaderRoute: typeof AuthedInvoicesIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/invoices/$invoiceId': {
+      id: '/_authed/invoices/$invoiceId'
+      path: '/invoices/$invoiceId'
+      fullPath: '/invoices/$invoiceId'
+      preLoaderRoute: typeof AuthedInvoicesInvoiceIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/orders/': {
+      id: '/_authed/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AuthedOrdersIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/orders/$orderId': {
+      id: '/_authed/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof AuthedOrdersOrderIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/orders/new': {
+      id: '/_authed/orders/new'
+      path: '/orders/new'
+      fullPath: '/orders/new'
+      preLoaderRoute: typeof AuthedOrdersNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/workspace/members': {
       id: '/_authed/workspace/members'
       path: '/workspace/members'
@@ -376,24 +490,36 @@ declare module '@tanstack/react-router' {
 interface AuthedRouteChildren {
   AuthedCustomersRoute: typeof AuthedCustomersRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedProductsRoute: typeof AuthedProductsRoute
   AuthedProjectsRoute: typeof AuthedProjectsRoute
   AuthedAcceptInvitationInvitationIdRoute: typeof AuthedAcceptInvitationInvitationIdRoute
   AuthedAccountSecurityRoute: typeof AuthedAccountSecurityRoute
+  AuthedInvoicesInvoiceIdRoute: typeof AuthedInvoicesInvoiceIdRoute
+  AuthedOrdersOrderIdRoute: typeof AuthedOrdersOrderIdRoute
+  AuthedOrdersNewRoute: typeof AuthedOrdersNewRoute
   AuthedWorkspaceMembersRoute: typeof AuthedWorkspaceMembersRoute
   AuthedWorkspaceNewRoute: typeof AuthedWorkspaceNewRoute
   AuthedWorkspaceSettingsRoute: typeof AuthedWorkspaceSettingsRoute
+  AuthedInvoicesIndexRoute: typeof AuthedInvoicesIndexRoute
+  AuthedOrdersIndexRoute: typeof AuthedOrdersIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCustomersRoute: AuthedCustomersRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedProductsRoute: AuthedProductsRoute,
   AuthedProjectsRoute: AuthedProjectsRoute,
   AuthedAcceptInvitationInvitationIdRoute:
     AuthedAcceptInvitationInvitationIdRoute,
   AuthedAccountSecurityRoute: AuthedAccountSecurityRoute,
+  AuthedInvoicesInvoiceIdRoute: AuthedInvoicesInvoiceIdRoute,
+  AuthedOrdersOrderIdRoute: AuthedOrdersOrderIdRoute,
+  AuthedOrdersNewRoute: AuthedOrdersNewRoute,
   AuthedWorkspaceMembersRoute: AuthedWorkspaceMembersRoute,
   AuthedWorkspaceNewRoute: AuthedWorkspaceNewRoute,
   AuthedWorkspaceSettingsRoute: AuthedWorkspaceSettingsRoute,
+  AuthedInvoicesIndexRoute: AuthedInvoicesIndexRoute,
+  AuthedOrdersIndexRoute: AuthedOrdersIndexRoute,
 }
 
 const AuthedRouteWithChildren =

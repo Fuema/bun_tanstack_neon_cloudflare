@@ -225,3 +225,181 @@ export const customer = pgTable(
 		index("customer_tenant_status_idx").on(t.tenantId, t.status),
 	],
 );
+
+// ---------------------------------------------------------------------------
+// Products, orders and invoices. Money is stored as integer cents and tax rates
+// as basis points (825 = 8.25%), so totals never suffer floating-point drift.
+// ---------------------------------------------------------------------------
+
+// Per-workspace defaults for new orders and invoices
+export const tenantSetting = pgTable("tenant_setting", {
+	tenantId: text("tenant_id")
+		.primaryKey()
+		.references(() => organization.id, { onDelete: "cascade" }),
+	// ISO 4217 code, e.g. "USD"
+	currency: text("currency").notNull().default("USD"),
+	defaultTaxRateBp: integer("default_tax_rate_bp").notNull().default(0),
+	paymentTermsDays: integer("payment_terms_days").notNull().default(30),
+	updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Document number sequences. Incremented with a single atomic upsert, so two
+// requests can never receive the same number. year = 0 for non-yearly series.
+export const tenantCounter = pgTable(
+	"tenant_counter",
+	{
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		// "order" | "invoice"
+		kind: text("kind").notNull(),
+		year: integer("year").notNull().default(0),
+		value: integer("value").notNull().default(0),
+	},
+	(t) => [uniqueIndex("tenant_counter_key").on(t.tenantId, t.kind, t.year)],
+);
+
+export const product = pgTable(
+	"product",
+	{
+		id: text("id").primaryKey(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		name: text("name").notNull(),
+		sku: text("sku").notNull(),
+		description: text("description"),
+		unitPriceCents: integer("unit_price_cents").notNull(),
+		// Inactive products stay on old orders but can't be added to new ones
+		active: boolean("active").notNull().default(true),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [
+		uniqueIndex("product_tenant_sku_unique").on(
+			t.tenantId,
+			sql`lower(${t.sku})`,
+		),
+		index("product_tenant_name_idx").on(t.tenantId, t.name),
+	],
+);
+
+// "order" is a reserved word in SQL, hence sales_order
+export const salesOrder = pgTable(
+	"sales_order",
+	{
+		id: text("id").primaryKey(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		// Shown as ORD-0001
+		number: integer("number").notNull(),
+		// A customer with orders can't be deleted
+		customerId: text("customer_id")
+			.notNull()
+			.references(() => customer.id, { onDelete: "restrict" }),
+		// draft | confirmed | fulfilled | cancelled
+		status: text("status").notNull().default("draft"),
+		orderDate: timestamp("order_date").notNull().defaultNow(),
+		currency: text("currency").notNull(),
+		taxRateBp: integer("tax_rate_bp").notNull().default(0),
+		subtotalCents: integer("subtotal_cents").notNull().default(0),
+		taxCents: integer("tax_cents").notNull().default(0),
+		totalCents: integer("total_cents").notNull().default(0),
+		notes: text("notes"),
+		createdById: text("created_by_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [
+		uniqueIndex("sales_order_tenant_number_unique").on(t.tenantId, t.number),
+		index("sales_order_tenant_status_idx").on(t.tenantId, t.status),
+		index("sales_order_customer_idx").on(t.customerId),
+	],
+);
+
+export const orderLine = pgTable(
+	"order_line",
+	{
+		id: text("id").primaryKey(),
+		orderId: text("order_id")
+			.notNull()
+			.references(() => salesOrder.id, { onDelete: "cascade" }),
+		position: integer("position").notNull(),
+		productId: text("product_id").references(() => product.id, {
+			onDelete: "set null",
+		}),
+		// Snapshot of the product at the time it was added
+		description: text("description").notNull(),
+		sku: text("sku"),
+		quantity: integer("quantity").notNull(),
+		unitPriceCents: integer("unit_price_cents").notNull(),
+		lineTotalCents: integer("line_total_cents").notNull(),
+	},
+	(t) => [index("order_line_order_idx").on(t.orderId)],
+);
+
+export const invoice = pgTable(
+	"invoice",
+	{
+		id: text("id").primaryKey(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		// One invoice per order; an order with an invoice can't be deleted
+		orderId: text("order_id")
+			.notNull()
+			.unique()
+			.references(() => salesOrder.id, { onDelete: "restrict" }),
+		customerId: text("customer_id")
+			.notNull()
+			.references(() => customer.id, { onDelete: "restrict" }),
+		// Shown as INV-2026-0001; numbered when issued, so drafts leave no gaps
+		year: integer("year"),
+		number: integer("number"),
+		// draft | issued | paid | void
+		status: text("status").notNull().default("draft"),
+		issueDate: timestamp("issue_date"),
+		dueDate: timestamp("due_date"),
+		paidAt: timestamp("paid_at"),
+		voidedAt: timestamp("voided_at"),
+		currency: text("currency").notNull(),
+		taxRateBp: integer("tax_rate_bp").notNull(),
+		subtotalCents: integer("subtotal_cents").notNull(),
+		taxCents: integer("tax_cents").notNull(),
+		totalCents: integer("total_cents").notNull(),
+		notes: text("notes"),
+		createdById: text("created_by_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(t) => [
+		uniqueIndex("invoice_tenant_number_unique").on(
+			t.tenantId,
+			t.year,
+			t.number,
+		),
+		index("invoice_tenant_status_idx").on(t.tenantId, t.status),
+	],
+);
+
+export const invoiceLine = pgTable(
+	"invoice_line",
+	{
+		id: text("id").primaryKey(),
+		invoiceId: text("invoice_id")
+			.notNull()
+			.references(() => invoice.id, { onDelete: "cascade" }),
+		position: integer("position").notNull(),
+		description: text("description").notNull(),
+		sku: text("sku"),
+		quantity: integer("quantity").notNull(),
+		unitPriceCents: integer("unit_price_cents").notNull(),
+		lineTotalCents: integer("line_total_cents").notNull(),
+	},
+	(t) => [index("invoice_line_invoice_idx").on(t.invoiceId)],
+);

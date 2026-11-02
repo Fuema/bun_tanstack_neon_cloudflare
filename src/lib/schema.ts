@@ -259,3 +259,148 @@ export const customerSearchSchema = z.object({
 });
 
 export type CustomerSearch = z.infer<typeof customerSearchSchema>;
+
+// --- Products, orders, invoices ---------------------------------------------
+
+const moneyString = (label: string) =>
+	z
+		.string()
+		.trim()
+		.regex(/^\d{1,9}(\.\d{1,2})?$/, `${label}: enter an amount like 19.99`);
+
+export const productInputSchema = z.object({
+	name: z
+		.string()
+		.trim()
+		.min(2, "Name must be at least 2 characters")
+		.max(100, "Name must not exceed 100 characters"),
+	sku: z
+		.string()
+		.trim()
+		.toUpperCase()
+		.min(2, "SKU must be at least 2 characters")
+		.max(32, "SKU must not exceed 32 characters")
+		.regex(
+			/^[A-Z0-9][A-Z0-9._-]*$/,
+			"SKU can use letters, numbers, dots, dashes and underscores",
+		),
+	description: z
+		.string()
+		.trim()
+		.max(500, "Description must not exceed 500 characters"),
+	price: moneyString("Price"),
+	active: z.boolean(),
+});
+export type ProductInput = z.infer<typeof productInputSchema>;
+
+export const ORDER_STATUSES = [
+	"draft",
+	"confirmed",
+	"fulfilled",
+	"cancelled",
+] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+export const INVOICE_STATUSES = ["draft", "issued", "paid", "void"] as const;
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
+
+const percentString = z
+	.string()
+	.trim()
+	.regex(/^\d{1,3}(\.\d{1,2})?$/, "Enter a tax rate like 8.25")
+	.refine((v) => Number(v) <= 100, "Tax rate can't exceed 100%");
+
+export const orderInputSchema = z.object({
+	customerId: z.uuid("Choose a customer"),
+	taxRate: percentString,
+	notes: z.string().trim().max(1000, "Notes must not exceed 1000 characters"),
+	lines: z
+		.array(
+			z.object({
+				productId: z.uuid("Choose a product"),
+				quantity: z.coerce
+					.number("Enter a quantity")
+					.int("Quantity must be a whole number")
+					.min(1, "Quantity must be at least 1")
+					.max(100_000, "Quantity must not exceed 100,000"),
+			}),
+		)
+		.min(1, "Add at least one line")
+		.max(100, "An order can have at most 100 lines")
+		.refine(
+			(lines) => new Set(lines.map((l) => l.productId)).size === lines.length,
+			"Each product can appear only once; change its quantity instead",
+		),
+});
+export type OrderInput = z.infer<typeof orderInputSchema>;
+
+export const billingSettingsSchema = z.object({
+	currency: z.enum(
+		[
+			"USD",
+			"EUR",
+			"GBP",
+			"CAD",
+			"MXN",
+			"BRL",
+			"ARS",
+			"AUD",
+			"JPY",
+			"INR",
+			"CHF",
+			"SEK",
+		],
+		"Choose a currency",
+	),
+	defaultTaxRate: percentString,
+	paymentTermsDays: z.coerce
+		.number("Enter a number of days")
+		.int("Use whole days")
+		.min(0, "Can't be negative")
+		.max(365, "Use at most 365 days"),
+});
+
+// Shared URL state for the product, order and invoice lists
+export function listSearchSchema<
+	const S extends readonly [string, ...string[]],
+	const C extends readonly [string, ...string[]],
+>(
+	statuses: S,
+	sortColumns: C,
+	defaultSort: C[number],
+	defaultDir: "asc" | "desc" = "desc",
+) {
+	return z.object({
+		page: z.coerce.number().int().min(1).max(10_000).catch(1).default(1),
+		pageSize: z.coerce
+			.number()
+			.refine((n) => (CUSTOMER_PAGE_SIZES as readonly number[]).includes(n))
+			.catch(10)
+			.default(10),
+		q: z.string().trim().max(100).catch("").default(""),
+		status: z.enum(statuses).optional().catch(undefined),
+		sort: z.enum(sortColumns).catch(defaultSort).default(defaultSort),
+		dir: z.enum(["asc", "desc"]).catch(defaultDir).default(defaultDir),
+	});
+}
+
+export const productSearchSchema = listSearchSchema(
+	["active", "inactive"],
+	["name", "sku", "unitPriceCents", "createdAt"],
+	"name",
+	"asc",
+);
+export const orderSearchSchema = listSearchSchema(
+	ORDER_STATUSES,
+	["number", "orderDate", "totalCents", "status"],
+	"number",
+);
+// "overdue" = issued and past its due date
+export const invoiceSearchSchema = listSearchSchema(
+	[...INVOICE_STATUSES, "overdue"],
+	["number", "issueDate", "dueDate", "totalCents", "status"],
+	"issueDate",
+);
+export type ProductSearch = z.infer<typeof productSearchSchema>;
+export type OrderSearch = z.infer<typeof orderSearchSchema>;
+export type InvoiceSearch = z.infer<typeof invoiceSearchSchema>;
