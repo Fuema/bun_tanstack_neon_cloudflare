@@ -5,7 +5,7 @@
 > pending. **Read it before changing anything; update it in the same PR as any
 > change it describes** (see the `spec-keeper` agent).
 >
-> Last updated: 2026-11-02 · `main` at `5c8435c` (PR #12, specification and subagents)
+> Last updated: 2026-11-02 · `main` at `bef6d45` (PR #13, skills and real email)
 
 ---
 
@@ -93,6 +93,7 @@ src/
 scripts/             seed scripts, email test, bundle check
 drizzle/             SQL migrations 0000-0005 (all applied to the dev database)
 .claude/agents/      Claude Code subagents for this repo (§13)
+.claude/skills/      general skills (commit-and-push, setup-*), master copy (§13)
 AGENTS.md            TanStack Intent skill loading
 ```
 
@@ -162,6 +163,7 @@ Adding a resource = one line in `statements` plus the four roles. Owner is only 
 
 | Route | What it does |
 |---|---|
+| `/` | No page: redirects on the server to `/dashboard` when signed in, otherwise to `/login` |
 | `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/two-factor`, `/verify-email` | Auth flows; theme switch and logo on the card |
 | `/dashboard` | KPI tiles (customers, new customers vs previous 30 days, active rate, team), new customers per month, customers by status, top countries; every chart has a table view; palette validated for color-vision deficiency (tokens `--viz-*` in `styles.css`) |
 | `/customers` | TanStack Table v9 in manual mode: search, status/country filters, sorting, pagination in Postgres; state in the URL; create/edit dialog |
@@ -252,7 +254,7 @@ Claude Code subagents in `.claude/agents/` (use them; they encode this spec):
 | `security-reviewer` | Review a diff for tenant isolation, permissions, validation and bundle leaks (read-only) |
 | `spec-keeper` | Update this file after a change (data model, features, pending tasks, changelog) |
 
-Subagents are for checks and reports; they run on their own and can't stop to ask the owner a question. Procedures that need the owner's input mid-way are **personal skills** in `~/.claude/skills/` (on the owner's machine, not in git, available in every project; run as `/<name>`):
+Subagents are for checks and reports; they run on their own and can't stop to ask the owner a question. Procedures that need the owner's input mid-way are **skills** in `.claude/skills/` (versioned in this private repo; run as `/<name>`):
 
 | Skill | Use it to |
 |---|---|
@@ -261,7 +263,9 @@ Subagents are for checks and reports; they run on their own and can't stop to as
 | `setup-neon-db` | Link an app to a Neon project and provision Postgres |
 | `setup-neon-auth` | Add Neon Auth (Managed Better Auth); recommends self-managed Better Auth when MFA/passkeys are needed, as here |
 
-These replaced the old `agents/` folder. `AGENTS.md` (TanStack Intent skills) moved to the repo root. On a new machine the skills must be copied to `~/.claude/skills/`; they're not restored by cloning.
+These replaced the old `agents/` folder. `AGENTS.md` (TanStack Intent skills) moved to the repo root.
+
+The skills are general (not tied to this app). This repo is their **master copy**; the owner also keeps them in `~/.claude/skills/` so other projects can use them. Edit them here and copy the folder there afterwards, so the two copies don't drift (both are visible in this project, with the same names). Only these four belong here: Claude Code's own `synced/` folder and installed skills such as `find-skills` (a link) stay in `~/.claude/skills/` only.
 
 ## 14. How to resume (checklist)
 
@@ -284,4 +288,5 @@ These replaced the old `agents/` folder. `AGENTS.md` (TanStack Intent skills) mo
 | #10 | Email dev fallback; products, orders, invoices; sidebar shell and dark mode |
 | #11 | Task board (dnd-kit) and activity calendar |
 | #12 | Specification, CLAUDE.md, subagents, `bun run validate` / `check:bundle` |
-| (this PR) | Real email via Resend confirmed in dev; domain verification left as a P1 task; `agents/` docs became personal skills (incl. new `setup-resend-email`), `AGENTS.md` moved to the root |
+| #13 | Real email via Resend confirmed in dev; domain verification left as a P1 task; `agents/` docs became personal skills (incl. new `setup-resend-email`), `AGENTS.md` moved to the root |
+| (this PR) | `/` redirects to the dashboard or sign-in instead of the starter page; the four skills versioned in `.claude/skills/` |
